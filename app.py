@@ -9,7 +9,7 @@ st.set_page_config(page_title="Industrial CO₂ Monitoring", layout="wide")
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("industrial_carbon_emissions.csv")
+    df = pd.read_csv("industrial_carbon_monitoring.csv")
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
