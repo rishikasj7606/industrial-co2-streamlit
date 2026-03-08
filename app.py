@@ -325,17 +325,20 @@ with tab5:
             c2.metric("Estimated Reduction", f"{est_reduction:.2f}%")
 
             if st.button("Record Schedule Recommendation to Blockchain"):
-                schedule_record = {
-                    "type": "schedule_recommendation",
-                    "industry": industry,
-                    "device_state": device,
-                    "start_date": str(start_date),
-                    "end_date": str(end_date),
-                    "block_hours": int(block_hours),
-                    "recommendations": rec_df.to_dict(orient="records")
-                }
-                st.session_state.bc.add_block(schedule_record)
-                st.success("Schedule recommendation recorded to blockchain.")else:
+    schedule_record = {
+        "type": "schedule_recommendation",
+        "industry": industry,
+        "device_state": device,
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "recommendations": best.to_dict(orient="records")
+    }
+
+    st.session_state.bc.add_block(schedule_record)
+    st.success("Schedule recommendation recorded to blockchain.")
+
+else:
+    st.info("Click the button to store the recommendation in the blockchain.")
     start_date, end_date = min_date, max_date
 
 mask = (
