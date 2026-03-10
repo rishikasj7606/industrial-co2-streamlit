@@ -337,6 +337,9 @@ with tab5:
     st.session_state.bc.add_block(schedule_record)
     st.success("Schedule recommendation recorded to blockchain.")
 
+    st.session_state.bc.add_block(schedule_record)
+    st.success("Schedule recommendation recorded to blockchain.")
+
 else:
     st.info("Click the button to store the recommendation in the blockchain.")
     start_date, end_date = min_date, max_date
