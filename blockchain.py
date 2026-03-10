@@ -1,7 +1,7 @@
 import hashlib
 import json
 import os
-from time import time
+from datetime import datetime
 
 
 class Block:
@@ -13,16 +13,13 @@ class Block:
         self.hash = self.compute_hash()
 
     def compute_hash(self):
-        block_string = json.dumps(
-            {
-                "index": self.index,
-                "timestamp": self.timestamp,
-                "data": self.data,
-                "previous_hash": self.previous_hash,
-            },
-            sort_keys=True,
-            default=str,
-        )
+        payload = {
+            "index": self.index,
+            "timestamp": self.timestamp,
+            "data": self.data,
+            "previous_hash": self.previous_hash,
+        }
+        block_string = json.dumps(payload, sort_keys=True, default=str)
         return hashlib.sha256(block_string.encode()).hexdigest()
 
     def to_dict(self):
@@ -36,14 +33,19 @@ class Block:
 
 
 class Blockchain:
-    def __init__(self, file_path="blockchain_data.json"):
+    def __init__(self, file_path="blockchain_ledger.json"):
         self.file_path = file_path
         self.chain = []
         self.load_chain()
 
     def create_genesis_block(self):
-        genesis_block = Block(0, time(), {"message": "Genesis Block"}, "0")
-        self.chain = [genesis_block]
+        genesis = Block(
+            index=0,
+            timestamp=str(datetime.now()),
+            data={"message": "Genesis Block"},
+            previous_hash="0",
+        )
+        self.chain = [genesis]
         self.save_chain()
 
     def add_block(self, data):
@@ -51,16 +53,19 @@ class Blockchain:
             self.create_genesis_block()
 
         previous_block = self.chain[-1]
-        new_block = Block(
+        block = Block(
             index=len(self.chain),
-            timestamp=time(),
+            timestamp=str(datetime.now()),
             data=data,
             previous_hash=previous_block.hash,
         )
-        self.chain.append(new_block)
+        self.chain.append(block)
         self.save_chain()
 
-    def is_chain_valid(self):
+    def get_chain(self):
+        return [block.to_dict() for block in self.chain]
+
+    def is_valid(self):
         if not self.chain:
             return True
 
@@ -76,9 +81,6 @@ class Blockchain:
 
         return True
 
-    def get_chain(self):
-        return [block.to_dict() for block in self.chain]
-
     def save_chain(self):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.get_chain(), f, indent=4)
@@ -90,20 +92,20 @@ class Blockchain:
 
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                rows = json.load(f)
 
             self.chain = []
-            for item in data:
+            for row in rows:
                 block = Block(
-                    index=item["index"],
-                    timestamp=item["timestamp"],
-                    data=item["data"],
-                    previous_hash=item["previous_hash"],
+                    index=row["index"],
+                    timestamp=row["timestamp"],
+                    data=row["data"],
+                    previous_hash=row["previous_hash"],
                 )
-                block.hash = item["hash"]
+                block.hash = row["hash"]
                 self.chain.append(block)
 
-            if not self.is_chain_valid():
+            if not self.is_valid():
                 self.create_genesis_block()
 
         except Exception:
